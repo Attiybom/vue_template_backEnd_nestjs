@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './user.entity';
 import { Logs } from '../logs/logs.entity';
+import { getUserDto } from './dto/get-user.dto';
 
 @Injectable()
 export class UserService {
@@ -11,8 +12,49 @@ export class UserService {
     @InjectRepository(Logs) private readonly logsRepository: Repository<Logs>,
   ) {}
 
-  findAll() {
-    return this.userRepository.find();
+  findAll(query: getUserDto) {
+    const { limit: take = 10, page, username, gender, role } = query;
+
+    // method-one
+    // return this.userRepository.find({
+    //   relations: ['profile', 'roles'],
+    //   skip: (page - 1) * take,
+    //   take,
+    // });
+
+    // method-two
+    return this.userRepository.find({
+      select: {
+        // 筛选字段
+        id: true,
+        username: true,
+        profile: {
+          gender: true,
+        },
+        // roles: {
+        //   id: true,
+        // },
+      },
+      relations: {
+        // 联合查询
+        roles: true,
+        profile: true,
+      },
+      where: {
+        // 条件筛选
+        username,
+        profile: {
+          gender,
+        },
+        roles: {
+          id: role, // 重命名
+        },
+      },
+      // 分页
+      skip: (page - 1) * take,
+      // 一页多少条 - limit
+      take,
+    });
   }
 
   find(username: string) {
