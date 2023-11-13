@@ -120,6 +120,12 @@ export class User {
 
 ```
 
+### 单独引入错误filter
+```ts
+// 如果不想要spec文件，则加上 --no-spec
+nest g f filers/typeorm --flat
+```
+
 
 ## bug相关
 ```ts
