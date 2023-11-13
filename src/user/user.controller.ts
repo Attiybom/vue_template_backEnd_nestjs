@@ -27,10 +27,16 @@ export class UserController {
 
   @Get()
   getUsers(): any {
-    this.logger.log(`请求getUsers成功`);
-    this.logger.warn(`请求getUsers成功`);
-    this.logger.error(`请求getUsers成功`);
+    // this.logger.log(`请求getUsers成功`);
+    // this.logger.warn(`请求getUsers成功`);
+    // this.logger.error(`请求getUsers成功`);
     return this.userService.findAll();
+    // return this.userService.getUsers();
+  }
+
+  @Get('/:id')
+  getUser(): any {
+    return '查询单个用户';
     // return this.userService.getUsers();
   }
 
