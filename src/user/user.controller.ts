@@ -6,13 +6,21 @@ import {
   Post,
   Inject,
   LoggerService,
+  Body,
+  Param,
+  Req,
+  Query,
+  UseFilters,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { ConfigService } from '@nestjs/config';
 import { User } from './user.entity';
 import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 
+import { getUserDto } from './dto/get-user.dto';
+import { TypeormFilter } from 'src/filters/typeorm.filter';
 @Controller('user')
+@UseFilters(new TypeormFilter())
 export class UserController {
   // private logger = new Logger(UserController.name);
 
@@ -26,46 +34,58 @@ export class UserController {
   }
 
   @Get()
-  getUsers(): any {
+  getUsers(@Query() query: getUserDto): any {
+    // console.log('getUsers-query', query);
+    console.log('sss');
+    // page-页码
+    // limit-每页条数
+    // condition-查询条件
+
     // this.logger.log(`请求getUsers成功`);
     // this.logger.warn(`请求getUsers成功`);
     // this.logger.error(`请求getUsers成功`);
-    return this.userService.findAll();
-    // return this.userService.getUsers();
-  }
-
-  @Get('/:id')
-  getUser(): any {
-    return '查询单个用户';
+    return this.userService.findAll(query);
     // return this.userService.getUsers();
   }
 
   @Post()
-  addUser(): any {
-    // todo 解析Body参数
-    const user = { username: 'toimc', password: '123456' } as User;
+  addUser(@Body() dto: any): any {
+    // 通过@Body() 把前端发送过来的数据解析到dto上
+    const user = dto as User;
     // return this.userService.addUser();
     return this.userService.create(user);
   }
-  @Patch()
-  updateUser(): any {
-    // todo 传递参数id
-    // todo 异常处理
-    const user = { username: 'newname' } as User;
-    return this.userService.update(1, user);
-  }
-
-  @Delete()
-  deleteUser(): any {
-    // todo 传递参数id
-    return this.userService.remove(1);
-  }
 
   @Get('/profile')
-  getUserProfile(): any {
+  getUserProfile(@Query() query: any): any {
+    console.log('getUserProfile-query', query);
     return this.userService.findProfile(2);
   }
 
+  @Get('/:id')
+  getUser(@Param('id') id: number): any {
+    console.log('getUser-id', id);
+    return '查询单个用户';
+    // return this.userService.getUsers();
+  }
+
+  @Patch('/:id')
+  updateUser(@Body() dto: any, @Param('id') id: number): any {
+    console.log('updateUser-dto', dto);
+    console.log('id', id);
+
+    const user = dto as User;
+    return this.userService.update(id, user);
+  }
+
+  @Delete('/:id')
+  deleteUser(@Param('id') id: number): any {
+    console.log('deleteUser-id', id);
+    // todo 传递参数id
+    return this.userService.remove(id);
+  }
+
+  // 后期挪到log模块去
   @Get('/logs')
   getUserLogs(): any {
     return this.userService.findUserLogs(2);
