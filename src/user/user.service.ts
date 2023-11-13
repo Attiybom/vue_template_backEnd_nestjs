@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { User } from './user.entity';
 import { Logs } from '../logs/logs.entity';
 import { getUserDto } from './dto/get-user.dto';
+import { conditionUtils } from 'src/utils/db.helper';
 
 @Injectable()
 export class UserService {
@@ -13,48 +14,62 @@ export class UserService {
   ) {}
 
   findAll(query: getUserDto) {
-    const { limit: take = 10, page, username, gender, role } = query;
+    const { limit: take = 10, page = 1, username, gender, role } = query;
+    const skip = (page - 1) * take;
+    // console.log('skip', skip, typeof skip);
+    // console.log('take', take, typeof take);
+    // console.log('page', page, typeof page);
 
     // method-one
     // return this.userRepository.find({
-    //   relations: ['profile', 'roles'],
-    //   skip: (page - 1) * take,
+    //   select: {
+    //     // 筛选字段
+    //     id: true,
+    //     username: true,
+    //     profile: {
+    //       gender: true,
+    //     },
+    //     // roles: {
+    //     //   id: true,
+    //     // },
+    //   },
+    //   relations: {
+    //     // 联合查询
+    //     roles: true,
+    //     profile: true,
+    //   },
+    //   where: {
+    //     // 条件筛选
+    //     username,
+    //     profile: {
+    //       gender,
+    //     },
+    //     roles: {
+    //       id: role, // 重命名
+    //     },
+    //   },
+    //   // 分页
+    //   skip,
+    //   // 一页多少条 - limit
     //   take,
     // });
 
     // method-two
-    return this.userRepository.find({
-      select: {
-        // 筛选字段
-        id: true,
-        username: true,
-        profile: {
-          gender: true,
-        },
-        // roles: {
-        //   id: true,
-        // },
-      },
-      relations: {
-        // 联合查询
-        roles: true,
-        profile: true,
-      },
-      where: {
-        // 条件筛选
-        username,
-        profile: {
-          gender,
-        },
-        roles: {
-          id: role, // 重命名
-        },
-      },
-      // 分页
-      skip: (page - 1) * take,
-      // 一页多少条 - limit
-      take,
-    });
+
+    const obj = {
+      'user.username': username,
+      'profile.gender': gender,
+      'roles.id': role,
+    };
+
+    const queryBuilder = this.userRepository
+      .createQueryBuilder('user')
+      .leftJoinAndSelect('user.profile', 'profile')
+      .leftJoinAndSelect('user.roles', 'roles');
+
+    const newBuilder = conditionUtils<User>(queryBuilder, obj);
+
+    return newBuilder.take(take).skip(skip).getMany();
   }
 
   find(username: string) {
@@ -67,7 +82,8 @@ export class UserService {
 
   async create(user: User) {
     const userTmp = await this.userRepository.create(user);
-    return this.userRepository.save(userTmp);
+    const res = await this.userRepository.save(userTmp);
+    return res;
   }
 
   async update(id: number, user: Partial<User>) {

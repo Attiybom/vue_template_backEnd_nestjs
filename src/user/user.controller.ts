@@ -32,7 +32,8 @@ export class UserController {
 
   @Get()
   getUsers(@Query() query: getUserDto): any {
-    console.log('getUsers-query', query);
+    // console.log('getUsers-query', query);
+    console.log('sss');
     // page-页码
     // limit-每页条数
     // condition-查询条件
