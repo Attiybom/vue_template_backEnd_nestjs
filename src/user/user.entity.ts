@@ -6,6 +6,8 @@ import {
   ManyToMany,
   JoinTable,
   OneToOne,
+  AfterInsert,
+  AfterRemove,
 } from 'typeorm';
 import { Logs } from '../logs/logs.entity';
 import { Roles } from '../roles/roles.entity';
@@ -32,4 +34,15 @@ export class User {
 
   @OneToOne(() => Profile, (profile) => profile.user)
   profile: Profile;
+
+  // 钩子方法
+  @AfterInsert()
+  afterInsert() {
+    console.log('afterInsert', this.id, this.username);
+  }
+
+  @AfterRemove()
+  afterRemove() {
+    console.log('afterRemove');
+  }
 }

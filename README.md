@@ -139,3 +139,26 @@ pnpm update
 pnpm install @types/request-ip
 
 ```
+
+
+### 其他相关
+* controller名 && service名 && repository名 取法
+![Alt text](image.png)
+```ts
+// xxx.controller.ts
+  @Delete('/:id') // Delete这里指的是restful API中的四种方法（get/post/patch/delete）之一
+  deleteUser(@Param('id') id: number): any {
+    console.log('deleteUser-id', id);
+    // todo 传递参数id
+    return this.userService.remove(id);
+  }
+```
+  - controller名 尽量语义化, 如getAllUsers/getUserById/createUser/updateUser/deleteUser
+  - service 层保持与repositories
+
+
+* typeorm 里面的 delete 与 remove 的区别
+ - ![Alt text](image-2.png)
+
+* service（服务）与 repositories（存储库）的区别
+ - ![Alt text](image-1.png)

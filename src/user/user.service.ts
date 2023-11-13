@@ -90,8 +90,10 @@ export class UserService {
     return this.userRepository.update(id, user);
   }
 
-  remove(id: number) {
-    return this.userRepository.delete(id);
+  async remove(id: number) {
+    // return this.userRepository.delete(id);
+    const user = await this.findOne(id);
+    return this.userRepository.remove(user);
   }
 
   findProfile(id: number) {
@@ -109,7 +111,7 @@ export class UserService {
     const user = await this.findOne(id);
     return this.logsRepository.find({
       where: {
-        user,
+        user: user.logs,
       },
       // relations: {
       //   user: true,

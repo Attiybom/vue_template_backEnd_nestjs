@@ -28,7 +28,7 @@ export class AllExceptionFilter implements ExceptionFilter {
         ? exception.getStatus()
         : HttpStatus.INTERNAL_SERVER_ERROR;
 
-    let errMsg: string = exception['response'] || 'Internal Server Error';
+    const errMsg: string = exception['response'] || 'Internal Server Error';
 
     // 此处可以假如更多错误逻辑处理
     // if (exception instanceof QueryFailedError) {
