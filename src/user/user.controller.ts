@@ -11,6 +11,9 @@ import {
   Req,
   Query,
   UseFilters,
+  Headers,
+  HttpException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { ConfigService } from '@nestjs/config';
@@ -70,12 +73,29 @@ export class UserController {
   }
 
   @Patch('/:id')
-  updateUser(@Body() dto: any, @Param('id') id: number): any {
-    console.log('updateUser-dto', dto);
-    console.log('id', id);
+  async updateUser(
+    @Body() dto: any,
+    @Param('id') id: number,
+    @Headers('Authorization') headers: any,
+  ): Promise<any> {
+    // 步骤有三
+    // 1.判断操作是否为用户本人操作
+    // 2.判断用户是否有更新user的权限
+    // 返回数据中不能包含敏感信息(password等)
 
-    const user = dto as User;
-    return this.userService.update(id, user);
+    console.log('updateUser-dto', dto);
+    console.log('updateUser-id', id);
+    console.log('updateUser-headers', headers);
+
+    // 步骤1（临时方案）
+    if (id === headers) {
+      // 是同一用户
+
+      const user = dto as User;
+      return this.userService.update(id, user);
+    } else {
+      throw new UnauthorizedException(); //403,没有权限，该方法已经集成好了
+    }
   }
 
   @Delete('/:id')
