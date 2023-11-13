@@ -114,6 +114,44 @@ export class User {
 
 ```
 
+## 更新数据
+```ts
+  // controller.ts
+  @Patch('/:id')
+  updateUser(@Body() dto: any, @Param('id') id: number): any {
+    // 步骤有三
+    // 1.判断操作是否为用户本人操作
+    // 2.判断用户是否有更新user的权限
+    // 返回数据中不能包含敏感信息(password等)
+
+    console.log('updateUser-dto', dto);
+    console.log('updateUser-id', id);
+
+    const user = dto as User;
+    return this.userService.update(id, user);
+  }
+
+  // service.ts
+    async update(id: number, user: Partial<User>) {
+    // 联合模型更新, 需要使用save方法或queryBuilder
+    // 1.先找到对应的实体
+    const userTemp = await this.findProfile(id);
+    // 2.将实体和前端传递过来的数据进行合并
+    const newUser = this.userRepository.merge(userTemp, user);
+
+    return this.userRepository.save(newUser);
+
+    // 单模型，不适合有关系的模型更新
+    // return this.userRepository.update(newUser);
+  }
+
+  // entity.ts
+  // 对应的关联映射要开启cascade: true, 才能实现级联更新
+  @OneToOne(() => Profile, (profile) => profile.user, { cascade: true })
+  profile: Profile;
+
+```
+
 ## 引入全局错误返回
 ```ts
 
