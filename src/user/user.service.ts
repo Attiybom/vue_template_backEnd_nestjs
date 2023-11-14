@@ -1,16 +1,18 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { User } from './user.entity';
 import { Logs } from '../logs/logs.entity';
 import { getUserDto } from './dto/get-user.dto';
 import { conditionUtils } from 'src/utils/db.helper';
+import { Roles } from 'src/roles/roles.entity';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectRepository(User) private readonly userRepository: Repository<User>,
     @InjectRepository(Logs) private readonly logsRepository: Repository<Logs>,
+    @InjectRepository(Logs) private readonly rolesRepository: Repository<Roles>,
   ) {}
 
   findAll(query: getUserDto) {
@@ -81,6 +83,15 @@ export class UserService {
   }
 
   async create(user: User) {
+    // 查询权限角色
+    if (Array.isArray(user.roles) && typeof user.roles[0] === 'number') {
+      user.roles = await this.rolesRepository.find({
+        where: {
+          id: In(user.roles),
+        },
+      });
+    }
+
     const userTmp = await this.userRepository.create(user);
     const res = await this.userRepository.save(userTmp);
     return res;
@@ -88,6 +99,14 @@ export class UserService {
 
   async update(id: number, user: Partial<User>) {
     const userTemp = await this.findProfile(id);
+    // 查询权限角色
+    if (Array.isArray(user.roles) && typeof user.roles[0] === 'number') {
+      user.roles = await this.rolesRepository.find({
+        where: {
+          id: In(user.roles),
+        },
+      });
+    }
     const newUser = this.userRepository.merge(userTemp, user);
 
     // 联合模型更新, 需要使用save方法或queryBuilder
@@ -98,9 +117,11 @@ export class UserService {
   }
 
   async remove(id: number) {
-    // return this.userRepository.delete(id);
-    const user = await this.findOne(id);
-    return this.userRepository.remove(user);
+    return this.userRepository.delete(id);
+    // const user = await this.findOne(id);
+    // console.log('remove_id', id);
+    // console.log('remove_user', user);
+    // return this.userRepository.remove(user);
   }
 
   findProfile(id: number) {

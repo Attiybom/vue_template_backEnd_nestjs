@@ -39,7 +39,6 @@ export class UserController {
   @Get()
   getUsers(@Query() query: getUserDto): any {
     // console.log('getUsers-query', query);
-    console.log('sss');
     // page-页码
     // limit-每页条数
     // condition-查询条件
@@ -76,7 +75,7 @@ export class UserController {
   async updateUser(
     @Body() dto: any,
     @Param('id') id: number,
-    @Headers('Authorization') headers: any,
+    @Req() req,
   ): Promise<any> {
     // 步骤有三
     // 1.判断操作是否为用户本人操作
@@ -84,18 +83,25 @@ export class UserController {
     // 返回数据中不能包含敏感信息(password等)
 
     console.log('updateUser-dto', dto);
-    console.log('updateUser-id', id);
-    console.log('updateUser-headers', headers);
+    console.log('updateUser-id', id, typeof id);
+    // console.log('updateUser-headers', headers);
+    console.log('req.user?.userId', req.body.id);
 
     // 步骤1（临时方案）
-    if (id === headers) {
-      // 是同一用户
-
-      const user = dto as User;
-      return this.userService.update(id, user);
-    } else {
-      throw new UnauthorizedException(); //403,没有权限，该方法已经集成好了
-    }
+    // if (+id === parseInt(req.body.id)) {
+    //   console.log(123);
+    //   // 说明是同一个用户在修改
+    //   // todo
+    //   // 权限1：判断用户是否是自己
+    //   // 权限2：判断用户是否有更新user的权限
+    //   // 返回数据：不能包含敏感的password等信息
+    //   const user = dto as User;
+    //   return this.userService.update(id, user);
+    // } else {
+    //   throw new UnauthorizedException(); //403,没有权限，该方法已经集成好了
+    // }
+    const user = dto as User;
+    return this.userService.update(id, user);
   }
 
   @Delete('/:id')
