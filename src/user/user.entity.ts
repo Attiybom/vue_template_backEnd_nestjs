@@ -8,6 +8,7 @@ import {
   OneToOne,
   AfterInsert,
   AfterRemove,
+  JoinColumn,
 } from 'typeorm';
 import { Logs } from '../logs/logs.entity';
 import { Roles } from '../roles/roles.entity';
@@ -25,14 +26,18 @@ export class User {
   password: string;
 
   // typescript -> 数据库 关联关系 Mapping
-  @OneToMany(() => Logs, (logs) => logs.user)
+  @OneToMany(() => Logs, (logs) => logs.user, { cascade: true })
   logs: Logs[];
 
-  @ManyToMany(() => Roles, (roles) => roles.users)
+  //  因为是1对多，这里cascade用数组形式，使用插入
+  @ManyToMany(() => Roles, (roles) => roles.users, { cascade: ['insert'] })
   @JoinTable({ name: 'users_roles' })
   roles: Roles[];
 
-  @OneToOne(() => Profile, (profile) => profile.user, { cascade: true })
+  // 因为是1对1，所以cascade可以直接设为true
+  @OneToOne(() => Profile, (profile) => profile.user, {
+    cascade: true,
+  })
   profile: Profile;
 
   // 钩子方法
@@ -43,6 +48,6 @@ export class User {
 
   @AfterRemove()
   afterRemove() {
-    console.log('afterRemove');
+    console.log('afterRemove', this.id);
   }
 }
