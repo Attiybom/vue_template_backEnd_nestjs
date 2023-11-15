@@ -12,7 +12,8 @@ export class UserService {
   constructor(
     @InjectRepository(User) private readonly userRepository: Repository<User>,
     @InjectRepository(Logs) private readonly logsRepository: Repository<Logs>,
-    @InjectRepository(Logs) private readonly rolesRepository: Repository<Roles>,
+    @InjectRepository(Roles)
+    private readonly rolesRepository: Repository<Roles>,
   ) {}
 
   findAll(query: getUserDto) {
