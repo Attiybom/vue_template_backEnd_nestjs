@@ -90,7 +90,16 @@ export class UserService {
     return this.userRepository.findOne({ where: { id } });
   }
 
-  async create(user: User) {
+  async create(user: Partial<User>) {
+    // 如果用户没有选择具体id，则默认普通用户
+    if (!user.roles) {
+      user.roles = await this.rolesRepository.find({
+        where: {
+          id: In([3]), // id为3的角色是普通用户
+        },
+      });
+    }
+
     // 查询权限角色
     if (Array.isArray(user.roles) && typeof user.roles[0] === 'number') {
       user.roles = await this.rolesRepository.find({
