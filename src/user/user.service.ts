@@ -60,7 +60,7 @@ export class UserService {
     // method-two
 
     const obj = {
-      'user.username': username,
+      // 'user.username': username,//如果名字需要模糊查询则注释掉
       'profile.gender': gender,
       'roles.id': role,
     };
@@ -71,6 +71,13 @@ export class UserService {
       .leftJoinAndSelect('user.roles', 'roles');
 
     const newBuilder = conditionUtils<User>(queryBuilder, obj);
+
+    if (username) {
+      // 用户名开启模糊查询
+      newBuilder.andWhere('user.username LIKE :username', {
+        username: `%${username}%`,
+      });
+    }
 
     return newBuilder.take(take).skip(skip).getMany();
   }
