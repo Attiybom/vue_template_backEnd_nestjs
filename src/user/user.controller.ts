@@ -14,6 +14,7 @@ import {
   Headers,
   HttpException,
   UnauthorizedException,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { ConfigService } from '@nestjs/config';
@@ -22,6 +23,8 @@ import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 
 import { getUserDto } from './dto/get-user.dto';
 import { TypeormFilter } from 'src/filters/typeorm.filter';
+import { CreateUserPipe } from './pipes/create-user/create-user.pipe';
+import { CreateUserDto } from './dto/create-user.dto';
 @Controller('user')
 @UseFilters(new TypeormFilter())
 export class UserController {
@@ -51,7 +54,7 @@ export class UserController {
   }
 
   @Post()
-  addUser(@Body() dto: any): any {
+  addUser(@Body(CreateUserPipe) dto: CreateUserDto): any {
     // 通过@Body() 把前端发送过来的数据解析到dto上
     const user = dto as User;
     // return this.userService.addUser();
@@ -59,9 +62,9 @@ export class UserController {
   }
 
   @Get('/profile')
-  getUserProfile(@Query() query: any): any {
-    console.log('getUserProfile-query', query);
-    return this.userService.findProfile(2);
+  // @Query('id', ParseIntPipe) id: any  => ParseIntPipe会将id转化为number类型
+  getUserProfile(@Query('id', ParseIntPipe) id: any): any {
+    return this.userService.findProfile(id);
   }
 
   @Get('/:id')
