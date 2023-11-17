@@ -123,10 +123,6 @@ export class User {
     // 1.判断操作是否为用户本人操作
     // 2.判断用户是否有更新user的权限
     // 返回数据中不能包含敏感信息(password等)
-
-    console.log('updateUser-dto', dto);
-    console.log('updateUser-id', id);
-
     const user = dto as User;
     return this.userService.update(id, user);
   }
@@ -200,3 +196,51 @@ pnpm install @types/request-ip
 
 * service（服务）与 repositories（存储库）的区别
  - ![Alt text](image-1.png)
+
+
+## 安全相关
+
+### 守卫与拦截器
+![Alt text](image-3.png)
+#### 序列化
+* 过滤敏感数据
+```ts
+// user.entity.ts
+import { Exclude } from 'class-transformer';
+@Entity()
+export class User {
+  @Column()
+  // 使用
+  @Exclude()
+  password: string;
+}
+
+// auth.controller.ts
+import { SerializeInterceptor } from 'src/interceptors/serialize/serialize.interceptor';
+
+@Controller('auth')
+@UseInterceptors(ClassSerializerInterceptor)
+@UseFilters(new TypeormFilter())
+
+```
+
+
+### pipe 与 Serialization
+![Alt text](image-4.png)
+
+
+#### pipe
+```ts
+// main.ts
+async function bootstrap() {
+  // 引入全局的拦截器
+  app.useGlobalPipes(
+    new ValidationPipe({
+      // 去除在类上不存在的字段，提高安全性如防止sql注入等
+      whitelist: true,
+    }),
+  );
+}
+bootstrap();
+
+```
