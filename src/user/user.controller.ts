@@ -14,6 +14,8 @@ import {
   Headers,
   HttpException,
   UnauthorizedException,
+  ParseIntPipe,
+  UseGuards,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { ConfigService } from '@nestjs/config';
@@ -22,8 +24,15 @@ import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 
 import { getUserDto } from './dto/get-user.dto';
 import { TypeormFilter } from 'src/filters/typeorm.filter';
+import { CreateUserPipe } from './pipes/create-user/create-user.pipe';
+import { CreateUserDto } from './dto/create-user.dto';
+import { AuthGuard } from '@nestjs/passport';
+import { AdminGuard } from 'src/guards/admin/admin.guard';
+import { JwtGuard } from 'src/guards/jwt/jwt.guard';
 @Controller('user')
+// @UseGuards(AuthGuard('jwt'))
 @UseFilters(new TypeormFilter())
+@UseGuards(JwtGuard)
 export class UserController {
   // private logger = new Logger(UserController.name);
 
@@ -37,6 +46,11 @@ export class UserController {
   }
 
   @Get()
+  // 1.装饰器的执行顺序，方法的装饰器如果有多个，则是从下往上执行
+  // @UseGuards(AdminGuard)
+  // @UseGuards(AuthGuard('jwt'))
+  // 2.如果使用UserGuard传递多个守卫，则从前往后执行，如果前面的guard没有通过，则后面的guard不会执行
+  @UseGuards(AuthGuard('jwt'), AdminGuard)
   getUsers(@Query() query: getUserDto): any {
     // console.log('getUsers-query', query);
     // page-页码
@@ -51,7 +65,7 @@ export class UserController {
   }
 
   @Post()
-  addUser(@Body() dto: any): any {
+  addUser(@Body(CreateUserPipe) dto: CreateUserDto): any {
     // 通过@Body() 把前端发送过来的数据解析到dto上
     const user = dto as User;
     // return this.userService.addUser();
@@ -59,9 +73,12 @@ export class UserController {
   }
 
   @Get('/profile')
-  getUserProfile(@Query() query: any): any {
-    console.log('getUserProfile-query', query);
-    return this.userService.findProfile(2);
+  // @Query('id', ParseIntPipe) id: any  => ParseIntPipe会将id转化为number类型
+  // @UseGuards(AuthGuard('jwt')) => 调用这个装饰器后会经过jwt.strategy.ts的步骤
+  @UseGuards(AuthGuard('jwt'))
+  getUserProfile(@Query('id', ParseIntPipe) id: any, @Req() req): any {
+    // console.log('getUserProfile-req', req.user);
+    return this.userService.findProfile(id);
   }
 
   @Get('/:id')
