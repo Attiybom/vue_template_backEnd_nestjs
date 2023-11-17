@@ -6,6 +6,7 @@ import { Logs } from '../logs/logs.entity';
 import { getUserDto } from './dto/get-user.dto';
 import { conditionUtils } from 'src/utils/db.helper';
 import { Roles } from 'src/roles/roles.entity';
+import * as argon2 from 'argon2';
 
 @Injectable()
 export class UserService {
@@ -83,7 +84,10 @@ export class UserService {
   }
 
   find(username: string) {
-    return this.userRepository.findOne({ where: { username } });
+    return this.userRepository.findOne({
+      where: { username },
+      relations: ['roles'],
+    });
   }
 
   findOne(id: number) {
@@ -110,6 +114,10 @@ export class UserService {
     }
 
     const userTmp = await this.userRepository.create(user);
+
+    // 加密操作
+    userTmp.password = await argon2.hash(userTmp.password);
+
     const res = await this.userRepository.save(userTmp);
     return res;
   }
