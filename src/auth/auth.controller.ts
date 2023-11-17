@@ -3,6 +3,7 @@ import {
   Controller,
   HttpException,
   Post,
+  Req,
   UseFilters,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
@@ -15,9 +16,12 @@ export class AuthController {
   constructor(private authService: AuthService) {}
 
   @Post('/signin')
-  signIn(@Body() dto: SigninUserDto) {
+  async signIn(@Body() dto: SigninUserDto) {
     const { username, password } = dto;
-    return this.authService.signin(username, password);
+    const token = await this.authService.signin(username, password);
+    return {
+      access_token: token,
+    };
   }
 
   @Post('/signup')
