@@ -7,6 +7,7 @@ import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 import { AppModule } from './app.module';
 import { AllExceptionFilter } from './filters/all-exception.filter';
 import { Logger, ValidationPipe } from '@nestjs/common';
+import { SerializeInterceptor } from './interceptors/serialize/serialize.interceptor';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
@@ -26,9 +27,12 @@ async function bootstrap() {
   app.useGlobalPipes(
     new ValidationPipe({
       // 去除在类上不存在的字段，提高安全性如防止sql注入等
-      // whitelist: true,
+      whitelist: true,
     }),
   );
+
+  // 全局拦截器
+  // app.useGlobalInterceptors(new SerializeInterceptor());
 
   const port = 3000;
   await app.listen(port);

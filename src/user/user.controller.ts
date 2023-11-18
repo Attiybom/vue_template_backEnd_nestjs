@@ -77,15 +77,15 @@ export class UserController {
   // @UseGuards(AuthGuard('jwt')) => 调用这个装饰器后会经过jwt.strategy.ts的步骤
   @UseGuards(AuthGuard('jwt'))
   getUserProfile(@Query('id', ParseIntPipe) id: any, @Req() req): any {
-    // console.log('getUserProfile-req', req.user);
+    console.log('getUserProfile-req');
     return this.userService.findProfile(id);
   }
 
   @Get('/:id')
   getUser(@Param('id') id: number): any {
     console.log('getUser-id', id);
-    return '查询单个用户';
-    // return this.userService.getUsers();
+    // return '查询单个用户';
+    return this.userService.findOne(id);
   }
 
   @Patch('/:id')
