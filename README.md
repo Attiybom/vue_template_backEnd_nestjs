@@ -244,3 +244,8 @@ async function bootstrap() {
 bootstrap();
 
 ```
+
+### bug - jwt
+* token不一样却能请求到对方的数据
+
+eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFyZ29uMlRlc3QzIiwic3ViIjozMiwiaWF0IjoxNzAwMzkxODEzLCJleHAiOjE3MDA5OTY2MTN9.-MXN6I0qqhmXQNU0uCR2J0auDiG4zOJi84qSJYK01Jk
