@@ -14,7 +14,7 @@ import { SigninUserDto } from './dto/sign-in.dto';
 import { SerializeInterceptor } from 'src/interceptors/serialize/serialize.interceptor';
 
 @Controller('auth')
-@UseInterceptors(ClassSerializerInterceptor)
+@UseInterceptors(ClassSerializerInterceptor) // 序列化
 @UseFilters(new TypeormFilter())
 export class AuthController {
   constructor(private authService: AuthService) {}

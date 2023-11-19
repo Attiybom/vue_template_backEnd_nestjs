@@ -12,7 +12,7 @@ export class Profile {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
+  @Column({ default: 1 })
   gender: number;
 
   @Column()

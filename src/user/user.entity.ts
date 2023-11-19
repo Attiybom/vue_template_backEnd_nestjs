@@ -44,13 +44,13 @@ export class User {
   profile: Profile;
 
   // 钩子方法
-  @AfterInsert()
-  afterInsert() {
-    console.log('afterInsert', this.id, this.username);
-  }
+  // @AfterInsert()
+  // afterInsert() {
+  //   console.log('afterInsert', this.id, this.username);
+  // }
 
-  @AfterRemove()
-  afterRemove() {
-    console.log('afterRemove', this.id);
-  }
+  // @AfterRemove()
+  // afterRemove() {
+  //   console.log('afterRemove', this.id);
+  // }
 }

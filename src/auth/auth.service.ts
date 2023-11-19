@@ -18,14 +18,12 @@ export class AuthService {
 
   async signin(username: string, password: string) {
     const user = await this.userService.find(username);
-
     if (!user) {
       throw new ForbiddenException('用户不存在，请先注册！');
     }
 
     // 使用argon2对用户密码比对
     const isPasswordValid = await argon2.verify(user.password, password);
-
     if (!isPasswordValid) {
       throw new ForbiddenException('用户名或密码错误！');
     }

@@ -29,10 +29,11 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { AdminGuard } from 'src/guards/admin/admin.guard';
 import { JwtGuard } from 'src/guards/jwt/jwt.guard';
+import { TestorGuard } from '../guards/admin/testor.guard';
+import { EditorGuard } from 'src/guards/admin/editor.guard';
 @Controller('user')
-// @UseGuards(AuthGuard('jwt'))
-@UseGuards(AuthGuard('jwt'), AdminGuard)
 @UseFilters(new TypeormFilter())
+// @UseGuards(AuthGuard('jwt'))
 @UseGuards(JwtGuard)
 export class UserController {
   // private logger = new Logger(UserController.name);
@@ -51,7 +52,7 @@ export class UserController {
   // @UseGuards(AdminGuard)
   // @UseGuards(AuthGuard('jwt'))
   // 2.如果使用UserGuard传递多个守卫，则从前往后执行，如果前面的guard没有通过，则后面的guard不会执行
-  @UseGuards(AuthGuard('jwt'), AdminGuard)
+  // @UseGuards(AuthGuard('jwt'), TestorGuard)
   getUsers(@Query() query: getUserDto): any {
     // console.log('getUsers-query', query);
     // page-页码
@@ -66,9 +67,12 @@ export class UserController {
   }
 
   @Post()
-  addUser(@Body(CreateUserPipe) dto: CreateUserDto): any {
+  @UseGuards(TestorGuard) // 游客没有权限
+  addUser(@Body(CreateUserPipe) dto: CreateUserDto, @Req() req): any {
     // 通过@Body() 把前端发送过来的数据解析到dto上
     const user = dto as User;
+    console.log('addUser-body', dto);
+    console.log('addUser-req', req.body.roles);
     // return this.userService.addUser();
     return this.userService.create(user);
   }
@@ -78,8 +82,6 @@ export class UserController {
   // @UseGuards(AuthGuard('jwt')) //
   @UseGuards(AuthGuard('jwt'))
   getUserProfile(@Query('id', ParseIntPipe) id: any, @Req() req): any {
-    console.log('getUserProfile-req', req.user);
-    console.log('getUserProfile-id', id);
     const { userId } = req.user;
     if (id !== userId) {
       throw new UnauthorizedException();
@@ -90,12 +92,12 @@ export class UserController {
 
   @Get('/:id')
   getUser(@Param('id') id: number): any {
-    console.log('getUser-id', id);
     // return '查询单个用户';
     return this.userService.findOne(id);
   }
 
   @Patch('/:id')
+  @UseGuards(EditorGuard)
   async updateUser(
     @Body() dto: any,
     @Param('id') id: number,
@@ -106,10 +108,10 @@ export class UserController {
     // 2.判断用户是否有更新user的权限
     // 返回数据中不能包含敏感信息(password等)
 
-    console.log('updateUser-dto', dto);
-    console.log('updateUser-id', id, typeof id);
-    // console.log('updateUser-headers', headers);
-    console.log('req.user?.userId', req.body.id);
+    // console.log('updateUser-dto', dto);
+    // console.log('updateUser-id', id, typeof id);
+    // // console.log('updateUser-headers', headers);
+    // console.log('req.user?.userId', req.body.id);
 
     // 步骤1（临时方案）
     // if (+id === parseInt(req.body.id)) {
@@ -124,13 +126,15 @@ export class UserController {
     // } else {
     //   throw new UnauthorizedException(); //403,没有权限，该方法已经集成好了
     // }
+    // console.log('update-req', req);
+    // console.log('update-body', dto);
     const user = dto as User;
     return this.userService.update(id, user);
   }
 
   @Delete('/:id')
   deleteUser(@Param('id') id: number): any {
-    console.log('deleteUser-id', id);
+    // console.log('deleteUser-id', id);
     // todo 传递参数id
     return this.userService.remove(id);
   }
