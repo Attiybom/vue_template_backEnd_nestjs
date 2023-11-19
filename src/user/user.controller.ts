@@ -31,6 +31,7 @@ import { AdminGuard } from 'src/guards/admin/admin.guard';
 import { JwtGuard } from 'src/guards/jwt/jwt.guard';
 @Controller('user')
 // @UseGuards(AuthGuard('jwt'))
+@UseGuards(AuthGuard('jwt'), AdminGuard)
 @UseFilters(new TypeormFilter())
 @UseGuards(JwtGuard)
 export class UserController {
@@ -74,10 +75,16 @@ export class UserController {
 
   @Get('/profile')
   // @Query('id', ParseIntPipe) id: any  => ParseIntPipe会将id转化为number类型
-  // @UseGuards(AuthGuard('jwt')) => 调用这个装饰器后会经过jwt.strategy.ts的步骤
+  // @UseGuards(AuthGuard('jwt')) //
   @UseGuards(AuthGuard('jwt'))
   getUserProfile(@Query('id', ParseIntPipe) id: any, @Req() req): any {
-    console.log('getUserProfile-req');
+    console.log('getUserProfile-req', req.user);
+    console.log('getUserProfile-id', id);
+    const { userId } = req.user;
+    if (id !== userId) {
+      throw new UnauthorizedException();
+    }
+
     return this.userService.findProfile(id);
   }
 
