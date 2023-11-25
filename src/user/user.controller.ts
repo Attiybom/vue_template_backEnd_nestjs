@@ -31,10 +31,13 @@ import { AdminGuard } from 'src/guards/admin/admin.guard';
 import { JwtGuard } from 'src/guards/jwt/jwt.guard';
 import { TestorGuard } from '../guards/admin/testor.guard';
 import { EditorGuard } from 'src/guards/admin/editor.guard';
+import { RoleGuard } from 'src/guards/role/role.guard';
+import { RoleEnum } from 'src/enum/role.enum';
+import { Roles } from 'src/decorator/roles.decorator';
 @Controller('user')
 @UseFilters(new TypeormFilter())
 // @UseGuards(AuthGuard('jwt'))
-@UseGuards(JwtGuard)
+@UseGuards(JwtGuard, RoleGuard)
 export class UserController {
   // private logger = new Logger(UserController.name);
 
@@ -67,7 +70,7 @@ export class UserController {
   }
 
   @Post()
-  @UseGuards(TestorGuard) // 游客没有权限
+  // @UseGuards(TestorGuard) // 游客没有权限
   addUser(@Body(CreateUserPipe) dto: CreateUserDto, @Req() req): any {
     // 通过@Body() 把前端发送过来的数据解析到dto上
     const user = dto as User;
@@ -80,7 +83,7 @@ export class UserController {
   @Get('/profile')
   // @Query('id', ParseIntPipe) id: any  => ParseIntPipe会将id转化为number类型
   // @UseGuards(AuthGuard('jwt')) //
-  @UseGuards(AuthGuard('jwt'))
+  // @UseGuards(AuthGuard('jwt'))
   getUserProfile(@Query('id', ParseIntPipe) id: any, @Req() req): any {
     const { userId } = req.user;
     if (id !== userId) {
@@ -97,7 +100,8 @@ export class UserController {
   }
 
   @Patch('/:id')
-  @UseGuards(EditorGuard)
+  @Roles(RoleEnum.EDITOR)
+  // @UseGuards(EditorGuard)
   async updateUser(
     @Body() dto: any,
     @Param('id') id: number,
@@ -133,6 +137,8 @@ export class UserController {
   }
 
   @Delete('/:id')
+  // @UseGuards(TestorGuard)
+  @Roles(RoleEnum.EDITOR)
   deleteUser(@Param('id') id: number): any {
     // console.log('deleteUser-id', id);
     // todo 传递参数id

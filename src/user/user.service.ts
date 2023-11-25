@@ -86,7 +86,7 @@ export class UserService {
   find(username: string) {
     return this.userRepository.findOne({
       where: { username },
-      relations: ['roles'],
+      relations: ['roles', 'roles.menus'],
     });
   }
 
@@ -100,7 +100,7 @@ export class UserService {
       console.log('未传roles');
       user.roles = await this.rolesRepository.find({
         where: {
-          id: In([3]), // id为3的角色是普通用户
+          id: In([2]), // id为2的是普通用户
         },
       });
     }
@@ -135,6 +135,9 @@ export class UserService {
       });
     }
     const newUser = this.userRepository.merge(userTemp, user);
+
+    // 加密操作
+    newUser.password = await argon2.hash(newUser.password);
 
     // 联合模型更新, 需要使用save方法或queryBuilder
     return this.userRepository.save(newUser);

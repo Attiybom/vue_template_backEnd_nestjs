@@ -18,7 +18,6 @@ import { RoleGuard } from 'src/guards/role/role.guard';
 import { JwtGuard } from 'src/guards/jwt/jwt.guard';
 
 @Controller('roles')
-@Roles(RoleEnum.ADMIN)
 @UseGuards(JwtGuard, RoleGuard)
 export class RolesController {
   constructor(private readonly rolesService: RolesService) {}
@@ -39,11 +38,13 @@ export class RolesController {
   }
 
   @Patch(':id')
+  @Roles(RoleEnum.EDITOR)
   update(@Param('id') id: string, @Body() updateRoleDto: UpdateRoleDto) {
     return this.rolesService.update(+id, updateRoleDto);
   }
 
   @Delete(':id')
+  @Roles(RoleEnum.EDITOR)
   remove(@Param('id') id: string) {
     return this.rolesService.remove(+id);
   }
