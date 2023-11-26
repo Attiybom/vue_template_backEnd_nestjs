@@ -97,7 +97,7 @@ export class UserService {
   async create(user: Partial<User>) {
     // 如果用户没有选择具体id，则默认普通用户
     if (!user.roles) {
-      console.log('未传roles');
+      // console.log('未传roles');
       user.roles = await this.rolesRepository.find({
         where: {
           id: In([2]), // id为2的是普通用户
@@ -107,7 +107,7 @@ export class UserService {
 
     // 查询权限角色
     if (Array.isArray(user.roles) && typeof user.roles[0] === 'number') {
-      console.log('查询权限角色');
+      // console.log('查询权限角色');
       user.roles = await this.rolesRepository.find({
         where: {
           id: In(user.roles),

@@ -26,7 +26,7 @@ export class CaslAbilityService {
       });
     });
 
-    console.log('casl-ability-user', user);
+    // console.log('casl-ability-user', user);
     // can('manage', 'all');
 
     // menu表 含有name\route\sort\action等字段
